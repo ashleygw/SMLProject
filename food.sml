@@ -132,14 +132,29 @@ fun sortByFanciness([]) = []
 	in sneakySort(fancy,tlist)@sneakySort(restaurant,tlist)@sneakySort(inthemiddle,tlist)@sneakySort(lowkey,tlist)
 	end;
 
+
+fun sortByCuisine(cuisinetype,[]) = []
+   |sortByCuisine(cuisinetype,placelist) = let 
+   	fun tupleList([]) = []
+	  | tupleList(x::rest) = makeTuple(findName(x),findCuisineList(x))::tupleList(rest);
+   	val tlist = tupleList(placelist);
+   	fun contains(x,[]) = false |
+  		contains(x,y::rest) = x=y orelse contains(x,rest);
+
+  	fun returnSameType([]) = []
+	   |returnSameType((x,y)::rest) = if contains(cuisinetype,y) then (x,y)::returnSameType(rest)
+	   else returnSameType(rest);
+	in 
+		returnSameType(tlist)
+	end;
+
+
+
 (*)
 fun returnPlace
 
-
-
 fun anyRestrictions
 
-fun sortByCuisine
 *)
 
 
