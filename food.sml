@@ -24,7 +24,11 @@ WB = ??, restaurant - 4.5
 *)
 
 
-datatype restaurantName = Saffron_Mediterranean_Kitchen | Brasserie_Four | T_Maccarones | Clarettes | Whitehouse_Crawford | Graze | El_Sombrero | Olive | The_Marc_Restaurant | Grandmas_Kitchen | Walla_Walla_Bread_Company | Sweet_Basil | Wingman_Birdz | Mill_Creek_Brewpub | Shiki_Hibachi_Sushi | Ox_and_Cart;
+datatype restaurantName = Saffron_Mediterranean_Kitchen | Brasserie_Four 
+| T_Maccarones | Clarettes | Whitehouse_Crawford | Graze | El_Sombrero 
+| Olive | The_Marc_Restaurant | Grandmas_Kitchen 
+| Walla_Walla_Bread_Company | Sweet_Basil | Wingman_Birdz 
+| Mill_Creek_Brewpub | Shiki_Hibachi_Sushi | Ox_and_Cart;
 
 datatype casual = lowkey | inthemiddle | restaurant | fancy;
 datatype foodType = Burgers | Sushi | Pizza | Pasta | Sandwiches | Breakfast | Meat | Fish | MexicanFood | Soups | Salads;
@@ -32,25 +36,17 @@ datatype options = Vegetarian | Pescatarian | GlutenFree | None;
 datatype cuisine = Japanese | Italian | American | Mexican;
 datatype price = $ | $$ | $$$ | $$$$;
 
-datatype categorizePlace = Place of restaurantName * casual * foodType list * options list * cuisine list * price * real;
+datatype categorizePlace = Place of restaurantName * casual * foodType list * options list * cuisine list * string * real;
 
-val GK = Place(Grandmas_Kitchen, lowkey, [MexicanFood], [Pescatarian, Vegetarian], [Mexican], $, 4.5);
-val SB = Place(Sweet_Basil, lowkey, [Pizza, Salads], [Pescatarian, Vegetarian, GlutenFree], [Italian, American], $, 4.5);
-val TM = Place(T_Maccarones, fancy, [Pizza, Pasta, Meat, Fish, Salads], [Pescatarian, Vegetarian], [Italian, American], $$$, 4.0);
-val G = Place(Graze, lowkey, [Sandwiches, Soups, Salads], [Pescatarian, Vegetarian], [American], $, 4.5);
-val MCB = Place(Mill_Creek_Brewpub, inthemiddle, [Burgers, Sandwiches, Salads, Meat, Fish], [Pescatarian, Vegetarian], [American], $$, 3.0);
-val SHS = Place(Shiki_Hibachi_Sushi, restaurant, [Sushi, Salads, Soups], [Pescatarian, Vegetarian], [Japanese], $$, 4.5);
-val OaC = Place(Ox_and_Cart, restaurant, [Pasta, Meat, Fish, Salads], [Pescatarian, Vegetarian], [American], $$$, 4.0);
+val GK = Place(Grandmas_Kitchen, lowkey, [MexicanFood], [Pescatarian, Vegetarian], [Mexican], "$", 4.5);
+val SB = Place(Sweet_Basil, lowkey, [Pizza, Salads], [Pescatarian, Vegetarian, GlutenFree], [Italian, American], "$", 4.5);
+val TM = Place(T_Maccarones, fancy, [Pizza, Pasta, Meat, Fish, Salads], [Pescatarian, Vegetarian], [Italian, American], "$$$", 4.0);
+val G = Place(Graze, lowkey, [Sandwiches, Soups, Salads], [Pescatarian, Vegetarian], [American], "$", 4.5);
+val MCB = Place(Mill_Creek_Brewpub, inthemiddle, [Burgers, Sandwiches, Salads, Meat, Fish], [Pescatarian, Vegetarian], [American], "$$", 3.0);
+val SHS = Place(Shiki_Hibachi_Sushi, restaurant, [Sushi, Salads, Soups], [Pescatarian, Vegetarian], [Japanese], "$$", 4.5);
+val OaC = Place(Ox_and_Cart, restaurant, [Pasta, Meat, Fish, Salads], [Pescatarian, Vegetarian], [American], "$$$", 4.0);
 
-fun sortByFanciness(placeList)
-
-fun sortByFoodType
-
-fun anyRestrictions
-
-fun sortByCuisine
-
-fun sortByPrice
+val allplaces = [GK,SB,TM,G,MCB,SHS,OaC];
 
 fun findName(Place(thename,_,_,_,_,_,_)) = thename;
 fun findCasual(Place(_,thecas,_,_,_,_,_)) = thecas;
@@ -62,33 +58,125 @@ fun findRating(Place(_,_,_,_,_,_,therate)) = therate;
 
 fun makeTuple(x,y) = (x,y);
 
-fun sortByRating([]) = []
-  | sortByRating(alist) =
-	let fun tupleList([]) = []
-	      | tupleList(x::rest) = makeTuple(findName(x),findRating(x))::tupleList(rest);
-	in sort(#2(tupleList(alist)));
+val testlist = [GK,SB,TM,G,MCB,SHS,OaC];
 
+
+fun sortByRating([]) = [] (*second item is real*)
+  | sortByRating(alist) =
+    let fun removeFirstT((x,y),[]) = []
+	  | removeFirstT((x,y),(a,b)::rest) =
+		if ((abs(y-b)<0.001) andalso x=a)
+		then rest
+		else (a,b)::removeFirstT((x,y),rest);
+	fun listMinT([(a,b:real)]) = (a,b)
+	  | listMinT((a,b:real)::rest) = 
+		let val n = #1(listMinT(rest));
+		    val m:real = #2(listMinT(rest));
+		in if b<m then (a,b) else (n,m)
+		end;
+	fun sortT([]) = []
+	  | sortT(xx) = 
+		let val m = listMinT(xx);
+		    val l = removeFirstT(m,xx);
+		in if not (null l) then m::sortT(l) else [m]
+		end;
+	fun tupleList([]) = []
+	  | tupleList(x::rest) = makeTuple(findName(x),findRating(x))::tupleList(rest);
+     in sortT(tupleList(alist))
+     end;
+
+fun sortByPrice([]) = [] (*second item is string*)
+  | sortByPrice(alist) =
+    let fun removeFirstT((x,y),[]) = []
+	  | removeFirstT((x,y),(a,b)::rest) =
+		if (y=b andalso x=a)
+		then rest
+		else (a,b)::removeFirstT((x,y),rest);
+	fun listMinT([(a,b:string)]) = (a,b)
+	  | listMinT((a,b:string)::rest) = 
+		let val n = #1(listMinT(rest));
+		    val m:string = #2(listMinT(rest));
+		in if b<m then (a,b) else (n,m)
+		end;
+	fun sortT([]) = []
+	  | sortT(xx) = 
+		let val m = listMinT(xx);
+		    val l = removeFirstT(m,xx);
+		in if not (l=[]) then m::sortT(l) else [m]
+		end;
+	fun tupleList([]) = []
+	  | tupleList(x::rest) = makeTuple(findName(x),findPrice(x))::tupleList(rest);
+     in sortT(tupleList(alist))
+     end;
+
+fun sortByFoodType(foodType, []) = []
+   |sortByFoodType(foodType, placelist) = let 
+   	fun contains(x,[]) = false |
+  		contains(x,y::rest) = x=y orelse contains(x,rest);
+   	fun tupleList([]) = []
+	  | tupleList(x::rest) = makeTuple(findName(x),findFoodList(x))::tupleList(rest);
+	fun returnSameType([]) = []
+	   |returnSameType((x,y)::rest) = if contains(foodType,y) then (x,y)::returnSameType(rest)
+	   else returnSameType(rest);
+	  in returnSameType(tupleList(placelist))
+	  end;	
+(*)
 fun returnPlace
 
+fun sortByFanciness
+
+fun anyRestrictions
+
+fun sortByCuisine
+*)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(*removes first occurence of x tuple in list of tuples*)
 fun removeFirst(x,[]) = []
   | removeFirst(x,y::rest) = if (x=y) then rest else y::removeFirst(x,rest);
 
-fun listMinT([(a,b)]) = (a,b) (*returns tuple*)
-  | listMinT((a,b)::rest) = 
+fun removeFirstT((x,y),[]) = [] (*works if y is real*)
+  | removeFirstT((x,y),(a,b)::rest) =
+	if ((abs(y-b)<0.001) andalso x=a)
+	then rest
+	else (a,b)::removeFirstT((x,y),rest);
+
+(*finds minimum of list of tuples (compares second item in tuple*)
+fun listMinT([(a,b:real)]) = (a,b) (*returns tuple*) (*works if b is real*) (*remove real to make int*)
+  | listMinT((a,b:real)::rest) = 
 	let val n = #1(listMinT(rest));
-	val m = #2(listMinT(rest));
+	val m:real = #2(listMinT(rest));
 	in if b<m then (a,b) else (n,m)
 	end;
+
+(*sorts list of tuples by second item; from lowest to highest*)
 fun sortT([]) = []
   | sortT(xx) = 
 	let val m = listMinT(xx);
-	    val l = removeFirst(m,xx);
-	in if not (l = []) then m::sortT(l)
+	    val l = removeFirstT(m,xx);
+	in if not (null l) then m::sortT(l)
  	else [m]
 	end;
 
 
 
+
+
+
+(*original listMin and sort functions*)
 fun listMin([x]) = x
   | listMin(x::rest) = 
 	let val m = listMin(rest);
