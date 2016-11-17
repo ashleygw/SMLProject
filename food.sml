@@ -109,6 +109,7 @@ fun sortByPrice([]) = [] (*second item is string*)
      in sortT(tupleList(alist))
      end;
 
+(*Returns all Places with specified foodtype.*)
 fun sortByFoodType(foodType, []) = []
    |sortByFoodType(foodType, placelist) = let 
    	fun contains(x,[]) = false |
@@ -120,10 +121,21 @@ fun sortByFoodType(foodType, []) = []
 	   else returnSameType(rest);
 	  in returnSameType(tupleList(placelist))
 	  end;	
+
+fun sortByFanciness([]) = []
+  | sortByFanciness(placelist) = let
+  	fun tupleList([]) = []
+	  | tupleList(x::rest) = makeTuple(findName(x),findCasual(x))::tupleList(rest);
+	fun sneakySort(casual,[]) = []
+	  | sneakySort(casual,(x,y)::rest) = if (y = casual) then (x,y)::sneakySort(casual,rest) else sneakySort(casual,rest);
+	val tlist = tupleList(placelist); 
+	in sneakySort(fancy,tlist)@sneakySort(restaurant,tlist)@sneakySort(inthemiddle,tlist)@sneakySort(lowkey,tlist)
+	end;
+
 (*)
 fun returnPlace
 
-fun sortByFanciness
+
 
 fun anyRestrictions
 
