@@ -1,29 +1,3 @@
-(*categorizing each restaurant
-SMK = ??, ??
-BF = ??, fancy
-
-C = breakfast, restaurant - 4.0
-WC = Italian, "Contemporary American", fancy - ****, $$$$
-
-ES = Mexican, restaurant
-O = Italian, sandwiches, Mexican, cafe
-TMR = ??, restaurant
-
-WWBC = ?? - 4.5
-
-WB = ??, restaurant - 4.5
-
-
-@GK = ethnic, Mexican, inthemiddle, Pescatarian, Vegetarian 4.5, $
-@SB = American, Italian, pizza, lowkey, 4.5, $, Vegetarian, Pescatarian, GlutenFree
-@TM = Italian, American, fancy, 4.0, $$$, Pescatarian, Vegetarian
-@G = American, sandwiches, soups, lowkey, Vegetarian, Pescatarian,$, 4.5
-@MCB = American, burgers, sandwiches, inthemiddle, Vegetarian,Pescatarian, 3.0, $$
-@SHS = Japanese, sushi, restaurant, 4.5, Vegatarian, Pescatarian, $$
-@OaC = "Contemporary American", Italian, restaurant, 4.0, $$$, Vegetarian, Pescatarian
-*)
-
-
 datatype restaurantName = Saffron_Mediterranean_Kitchen | Brasserie_Four 
 | T_Maccarones | Clarettes | Whitehouse_Crawford | Graze | El_Sombrero 
 | Olive | The_Marc_Restaurant | Grandmas_Kitchen 
@@ -58,9 +32,7 @@ fun findRating(Place(_,_,_,_,_,_,therate)) = therate;
 
 fun makeTuple(x,y) = (x,y);
 
-val testlist = [GK,SB,TM,G,MCB,SHS,OaC];
-
-
+(*Takes a list of places and returns a list sorted by ratings*)
 fun sortByRating([]) = [] (*second item is real*)
   | sortByRating(alist) =
     let fun removeFirstT((x,y),[]) = []
@@ -85,6 +57,7 @@ fun sortByRating([]) = [] (*second item is real*)
      in sortT(tupleList(alist))
      end;
 
+(*Takes a list of places and returns a list sorted by price*)
 fun sortByPrice([]) = [] (*second item is string*)
   | sortByPrice(alist) =
     let fun removeFirstT((x,y),[]) = []
@@ -122,6 +95,7 @@ fun sortByFoodType(foodType, []) = []
 	  in returnSameType(tupleList(placelist))
 	  end;	
 
+(*Takes a list of places and returns their how fancy they are, sorted from most to least*)
 fun sortByFanciness([]) = []
   | sortByFanciness(placelist) = let
   	fun tupleList([]) = []
@@ -129,10 +103,13 @@ fun sortByFanciness([]) = []
 	fun sneakySort(casual,[]) = []
 	  | sneakySort(casual,(x,y)::rest) = if (y = casual) then (x,y)::sneakySort(casual,rest) else sneakySort(casual,rest);
 	val tlist = tupleList(placelist); 
-	in sneakySort(fancy,tlist)@sneakySort(restaurant,tlist)@sneakySort(inthemiddle,tlist)@sneakySort(lowkey,tlist)
+	in sneakySort(fancy,tlist)@
+		sneakySort(restaurant,tlist)@
+		sneakySort(inthemiddle,tlist)@
+		sneakySort(lowkey,tlist)
 	end;
 
-
+(*Takes a choice of cuisine and list of places and returns a list of restaurants and what cuisine they serve*)
 fun sortByCuisine(cuisinetype,[]) = []
    |sortByCuisine(cuisinetype,placelist) = let 
    	fun tupleList([]) = []
@@ -140,7 +117,6 @@ fun sortByCuisine(cuisinetype,[]) = []
    	val tlist = tupleList(placelist);
    	fun contains(x,[]) = false |
   		contains(x,y::rest) = x=y orelse contains(x,rest);
-
   	fun returnSameType([]) = []
 	   |returnSameType((x,y)::rest) = if contains(cuisinetype,y) then (x,y)::returnSameType(rest)
 	   else returnSameType(rest);
@@ -148,28 +124,20 @@ fun sortByCuisine(cuisinetype,[]) = []
 		returnSameType(tlist)
 	end;
 
-
-
-(*)
-fun returnPlace
-
-fun anyRestrictions
-
-*)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+(*Takes a diet restriction and list of places and returns a list of restaurant names and their accommodations*)
+fun anyRestrictions(restriction, []) = []
+   |anyRestrictions(restriction, placelist) = let 
+   	fun tupleList([]) = []
+	  | tupleList(x::rest) = makeTuple(findName(x),findOptionsList(x))::tupleList(rest);
+	val tlist = tupleList(placelist);
+   	fun contains(x,[]) = false |
+  		contains(x,y::rest) = x=y orelse contains(x,rest);
+  	fun returnSameType([]) = []
+	   |returnSameType((x,y)::rest) = if contains(restriction,y) then (x,y)::returnSameType(rest)
+	   else returnSameType(rest);
+	in 
+		returnSameType(tlist)
+	end;
 
 (*removes first occurence of x tuple in list of tuples*)
 fun removeFirst(x,[]) = []
@@ -197,11 +165,6 @@ fun sortT([]) = []
 	in if not (null l) then m::sortT(l)
  	else [m]
 	end;
-
-
-
-
-
 
 (*original listMin and sort functions*)
 fun listMin([x]) = x
